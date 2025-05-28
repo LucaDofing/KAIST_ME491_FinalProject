@@ -18,12 +18,12 @@ LOWPASS_ENVELOPE_FILTER_PARAMS = {
 }
 
 # --- Data File and Column Configuration ---
-DEFAULT_DATA_FILEPATH = "data/raw/converted_data1.csv"
+DEFAULT_DATA_FILEPATH = "data/raw/converted_data4.csv"
 EMG_COLUMNS = {
     "RightLeg": "emg_R1",
     "LeftLeg": "emg_L1"
 }
-DEFAULT_TIME_COLUMN_NAME = "time"
+DEFAULT_TIME_COLUMN_NAME = "loopCnt"
 
 # --- Plotting Configuration ---
 PLOTTING_PARAMS = {
