@@ -129,39 +129,37 @@ def plot_multi_leg_raw_vs_envelope(time_axis, raw_signals_map, envelope_signals_
         plt.savefig(final_save_path); print(f"Multi-leg comparison plot saved to {final_save_path}")
     plt.show()
 
-def plot_normalized_emg_and_thigh_angles(time_axis, envelope_signals_map, thigh_angle_signals_map, title="Normalized EMG Envelopes and Thigh Angles", save_path=None):
-    import matplotlib.pyplot as plt
+def plot_legwise_normalized_emg_and_angle(time_axis, envelope_signals_map, thigh_angle_signals_map, save_dir="results/figures"):
     from sklearn.preprocessing import MinMaxScaler
 
-    scaler = MinMaxScaler()
-    plt.figure(figsize=(12, 6))
-    
-    all_signals = {}
+    os.makedirs(save_dir, exist_ok=True)
 
-    # Normalize and store EMG envelopes
-    for leg, signal in envelope_signals_map.items():
-        norm = scaler.fit_transform(signal.reshape(-1, 1)).flatten()
-        all_signals[f"{leg} EMG"] = norm
-        plt.plot(time_axis, norm, label=f"{leg} EMG", linewidth=2)
+    for leg in ["LeftLeg", "RightLeg"]:
+        emg = envelope_signals_map.get(leg)
+        angle = thigh_angle_signals_map.get(leg)
+        if emg is None or angle is None:
+            print(f"Skipping {leg} — missing data.")
+            continue
 
-    # Normalize and store thigh angles
-    for leg, signal in thigh_angle_signals_map.items():
-        norm = scaler.fit_transform(signal.reshape(-1, 1)).flatten()
-        all_signals[f"{leg} ThighAngle"] = norm
-        plt.plot(time_axis, norm, label=f"{leg} ThighAngle", linestyle='--', linewidth=1.5)
+        scaler = MinMaxScaler()
+        emg_norm = scaler.fit_transform(emg.reshape(-1, 1)).flatten()
+        angle_norm = scaler.fit_transform(angle.reshape(-1, 1)).flatten()
 
-    plt.title(title)
-    plt.xlabel("Time (s)")
-    plt.ylabel("Normalized Value [0–1]")
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
+        plt.figure(figsize=(10, 5))
+        plt.plot(time_axis, emg_norm, label=f"{leg} EMG Envelope", linewidth=2)
+        plt.plot(time_axis, angle_norm, label=f"{leg} Thigh Angle", linestyle='--', linewidth=1.5)
+        plt.title(f"Normalized {leg} EMG Envelope and Thigh Angle")
+        plt.xlabel("Time (s)")
+        plt.ylabel("Normalized Value [0–1]")
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
 
-    if save_path:
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        save_path = os.path.join(save_dir, f"{leg.lower()}_normalized_emg_thigh.png")
         plt.savefig(save_path)
-        print(f"Normalized plot saved to {save_path}")
-    plt.show()
+        print(f"{leg} normalized plot saved to {save_path}")
+        plt.show()
+
 
 
 # --- Main ---
@@ -245,13 +243,13 @@ if __name__ == "__main__":
             main_title="EMG Raw vs. Envelope Comparison",
             save_path_prefix=f"results/figures/multi_leg"
         )
-        plot_normalized_emg_and_thigh_angles(
+        plot_legwise_normalized_emg_and_angle(
             time_vector,
             envelope_emg_signals_for_plot,
             thigh_angle_signals,
-            title="Normalized EMG Envelopes and Thigh Angles",
-            save_path="results/figures/normalized_emg_thigh.png"
+            save_dir="results/figures"
         )
+
 
 
     print("\nEMG processing script finished.")
