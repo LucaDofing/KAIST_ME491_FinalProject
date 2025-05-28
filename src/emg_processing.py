@@ -56,7 +56,9 @@ def process_single_emg_channel(raw_emg_data, fs,
     return raw_emg_data, emg_hp, emg_notch, emg_rectified, emg_envelope
 
 # --- Plotting Functions ---
-def plot_multi_leg_emg_processing_steps(time_axis, processed_signals_map, main_title_prefix="EMG Processing", save_path_prefix=None, figsize=config.PLOTTING_PARAMS["steps_plot_figsize"]):
+def plot_multi_leg_emg_processing_steps(time_axis, processed_signals_map, main_title_prefix="EMG Processing",
+                                        save_path_prefix=None, figsize=config.PLOTTING_PARAMS["steps_plot_figsize"],
+                                        additional_angle_signals_map=None):  # <-- Added optional param
     num_steps = 5
     leg_names = list(processed_signals_map.keys())
     if not leg_names:
@@ -81,6 +83,14 @@ def plot_multi_leg_emg_processing_steps(time_axis, processed_signals_map, main_t
                 color = leg_colors.get(leg_name, 'black')
                 linewidth = 1.5 if i == 4 else 1.0
                 axs[i].plot(time_axis, signals[i], label=f"{leg_name}", color=color, linewidth=linewidth)
+        
+        # Add thigh angle overlay in step 5
+        if i == 4 and additional_angle_signals_map:
+            for leg_name in leg_names:
+                angle_signal = additional_angle_signals_map.get(leg_name)
+                if angle_signal is not None:
+                    axs[i].plot(time_axis, angle_signal, linestyle='--', label=f"{leg_name} ThighAngle", alpha=0.5)
+
         if i == 0: axs[i].legend(loc='upper right')
 
     axs[-1].set_xlabel("Time (s)")
@@ -119,6 +129,41 @@ def plot_multi_leg_raw_vs_envelope(time_axis, raw_signals_map, envelope_signals_
         plt.savefig(final_save_path); print(f"Multi-leg comparison plot saved to {final_save_path}")
     plt.show()
 
+def plot_normalized_emg_and_thigh_angles(time_axis, envelope_signals_map, thigh_angle_signals_map, title="Normalized EMG Envelopes and Thigh Angles", save_path=None):
+    import matplotlib.pyplot as plt
+    from sklearn.preprocessing import MinMaxScaler
+
+    scaler = MinMaxScaler()
+    plt.figure(figsize=(12, 6))
+    
+    all_signals = {}
+
+    # Normalize and store EMG envelopes
+    for leg, signal in envelope_signals_map.items():
+        norm = scaler.fit_transform(signal.reshape(-1, 1)).flatten()
+        all_signals[f"{leg} EMG"] = norm
+        plt.plot(time_axis, norm, label=f"{leg} EMG", linewidth=2)
+
+    # Normalize and store thigh angles
+    for leg, signal in thigh_angle_signals_map.items():
+        norm = scaler.fit_transform(signal.reshape(-1, 1)).flatten()
+        all_signals[f"{leg} ThighAngle"] = norm
+        plt.plot(time_axis, norm, label=f"{leg} ThighAngle", linestyle='--', linewidth=1.5)
+
+    plt.title(title)
+    plt.xlabel("Time (s)")
+    plt.ylabel("Normalized Value [0–1]")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+
+    if save_path:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(save_path)
+        print(f"Normalized plot saved to {save_path}")
+    plt.show()
+
+
 # --- Main ---
 if __name__ == "__main__":
     print(f"Current Working Directory: {os.getcwd()}")
@@ -136,6 +181,7 @@ if __name__ == "__main__":
     envelope_emg_signals_for_plot = {}
     time_vector = None
     data_loaded_successfully = False
+    thigh_angle_signals = {}  # New: Store angles for plotting
 
     if raw_data_df is None:
         print(f"Failed to load data from {actual_data_filepath}. Exiting.")
@@ -157,6 +203,12 @@ if __name__ == "__main__":
         print("Error: Data file loaded but it is empty. Exiting.")
         exit()
 
+    # Load thigh angle data
+    if 'thighDeg_RH' in raw_data_df.columns:
+        thigh_angle_signals["RightLeg"] = raw_data_df['thighDeg_RH'].values
+    if 'thighDeg_LH' in raw_data_df.columns:
+        thigh_angle_signals["LeftLeg"] = raw_data_df['thighDeg_LH'].values
+
     for leg_label, emg_col_name in emg_columns_map.items():
         if emg_col_name and emg_col_name in raw_data_df.columns:
             print(f"\nProcessing EMG for {leg_label} (column: {emg_col_name})...")
@@ -167,8 +219,8 @@ if __name__ == "__main__":
             
             processed_signals = process_single_emg_channel(raw_signal, sampling_rate_hz)
             processed_emg_data[leg_label] = processed_signals
-            raw_emg_signals_for_plot[leg_label] = processed_signals[0] # Raw
-            envelope_emg_signals_for_plot[leg_label] = processed_signals[4] # Envelope
+            raw_emg_signals_for_plot[leg_label] = processed_signals[0]
+            envelope_emg_signals_for_plot[leg_label] = processed_signals[4]
             data_loaded_successfully = True
         elif emg_col_name: 
             print(f"Warning: EMG column '{emg_col_name}' for {leg_label} not found in the data. Skipping this channel.")
@@ -183,7 +235,8 @@ if __name__ == "__main__":
             time_vector,
             processed_emg_data,
             main_title_prefix="EMG Processing",
-            save_path_prefix=f"results/figures/multi_leg"
+            save_path_prefix=f"results/figures/multi_leg",
+            additional_angle_signals_map=thigh_angle_signals  # <- NEW
         )
         plot_multi_leg_raw_vs_envelope(
             time_vector,
@@ -192,5 +245,13 @@ if __name__ == "__main__":
             main_title="EMG Raw vs. Envelope Comparison",
             save_path_prefix=f"results/figures/multi_leg"
         )
+        plot_normalized_emg_and_thigh_angles(
+            time_vector,
+            envelope_emg_signals_for_plot,
+            thigh_angle_signals,
+            title="Normalized EMG Envelopes and Thigh Angles",
+            save_path="results/figures/normalized_emg_thigh.png"
+        )
+
 
     print("\nEMG processing script finished.")
