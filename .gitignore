@@ -13,8 +13,8 @@ __pycache__/
 .idea/
 *.DS_Store
 
-# Maybe for large data
+# Maybe for large data later
 # data/raw/*.csv
 # data/processed/*.csv
-# results/figures/*.png
+results/figures/*.png
 # results/figures/*.pdf
