@@ -1,0 +1,20 @@
+# Virtual Environment
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE / Editor specific
+.vscode/
+.idea/
+*.DS_Store
+
+# Maybe for large data
+# data/raw/*.csv
+# data/processed/*.csv
+# results/figures/*.png
+# results/figures/*.pdf
