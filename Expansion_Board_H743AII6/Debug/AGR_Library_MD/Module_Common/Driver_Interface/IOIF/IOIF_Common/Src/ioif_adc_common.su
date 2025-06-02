@@ -1,0 +1,7 @@
+../AGR_Library_MD/Module_Common/Driver_Interface/IOIF/IOIF_Common/Src/ioif_adc_common.c:113:17:IOIF_StartADCBlock	16	static
+../AGR_Library_MD/Module_Common/Driver_Interface/IOIF/IOIF_Common/Src/ioif_adc_common.c:130:17:IOIF_StopADCBlock	16	static
+../AGR_Library_MD/Module_Common/Driver_Interface/IOIF/IOIF_Common/Src/ioif_adc_common.c:148:17:IOIF_RunADCConvBlock	16	static
+../AGR_Library_MD/Module_Common/Driver_Interface/IOIF/IOIF_Common/Src/ioif_adc_common.c:166:17:IOIF_GetADCVal	16	static
+../AGR_Library_MD/Module_Common/Driver_Interface/IOIF/IOIF_Common/Src/ioif_adc_common.c:189:17:IOIF_StartADCDMA	32	static
+../AGR_Library_MD/Module_Common/Driver_Interface/IOIF/IOIF_Common/Src/ioif_adc_common.c:227:17:IOIF_StopADCDMA	16	static
+../AGR_Library_MD/Module_Common/Driver_Interface/IOIF/IOIF_Common/Src/ioif_adc_common.c:251:17:IOIF_SetADCCB	24	static
