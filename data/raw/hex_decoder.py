@@ -276,9 +276,9 @@ def write_csv_from_hex(hex_data_file, csv_file):
                 writer.writerow(data)
 
 # 예시 Hex 데이터 파일 경로
-hex_data_file = r"/home/luca/Documents/KAIST/HAR/HAR_FinalProject/data/raw/SUIT_LOGGED_DATA-8.csv"
+hex_data_file = r"/home/luca/Documents/KAIST/HAR/HAR_FinalProject/data/raw/FSR/SUIT_LOGGED_DATA-3.csv"
 
 # 결과 CSV 파일 경로
-csv_file = r"/home/luca/Documents/KAIST/HAR/HAR_FinalProject/data/raw/converted_data8.csv"
+csv_file = r"/home/luca/Documents/KAIST/HAR/HAR_FinalProject/data/raw/FSR/converted_data3.csv"
 # Hex 데이터를 CSV 파일에 쓰기
 write_csv_from_hex(hex_data_file, csv_file)
