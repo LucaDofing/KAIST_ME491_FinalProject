@@ -1,0 +1,1 @@
+loopCnt,assist_level,thighDeg_RH,incPosDeg_RH,MotorActCurrent_RH,accX_Calib_RH,accY_Calib_RH,gyroZ_Calib_RH,thighDeg_LH,incPosDeg_LH,MotorActCurrent_LH,accX_Calib_LH,accY_Calib_LH,gyroZ_Calib_LH,u_RH,u_LH,Pvector_ref_RH,Pvector_ref_LH,extension_control_mode,emg_R1,emg_L1,fsr_R1,fsr_R2,fsr_L1,fsr_L2,free_var1,free_var2
