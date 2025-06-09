@@ -6,7 +6,48 @@
 #ifndef ROBOT_EMG_CONTROLLER_H
 #define ROBOT_EMG_CONTROLLER_H
 
-#include "algorithm_ctrl.h"
+// Forward declarations of types from algorithm_ctrl.h
+// This avoids including algorithm_ctrl.h directly
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// External variables from algorithm_ctrl.h that we need
+extern float EMG_R1_Rawsignal;
+extern float EMG_L1_Rawsignal;
+extern float free_var1;
+extern float free_var2;
+extern float free_var3;
+extern float free_var4;
+extern float free_var5;
+extern float f_vector_input_RH;
+extern float f_vector_input_LH;
+
+// Forward declare the types we need
+typedef struct _RobotData_t RobotData_t;
+typedef struct _UserDefinedCtrl UserDefinedCtrl;
+typedef struct _GravComp GravComp;
+typedef struct _ImpedanceCtrl ImpedanceCtrl;
+typedef struct _StepCurr StepCurr;
+typedef enum _ControlMode_t ControlMode;
+
+// External variables that are structs
+extern RobotData_t robotDataObj_RH;
+extern RobotData_t robotDataObj_LH;
+extern UserDefinedCtrl UserDefinedCtrl_RH;
+extern UserDefinedCtrl UserDefinedCtrl_LH;
+extern GravComp gravCompDataObj_RH;
+extern GravComp gravCompDataObj_LH;
+extern ImpedanceCtrl impedanceCtrl_RH;
+extern ImpedanceCtrl impedanceCtrl_LH;
+extern StepCurr StepCurr_RH;
+extern StepCurr StepCurr_LH;
+extern ControlMode controlMode;
+
+// Define USER_DEFINED_CTRL if not already defined
+#ifndef USER_DEFINED_CTRL
+#define USER_DEFINED_CTRL 6
+#endif
 
 /*
  * Function Prototypes
@@ -82,5 +123,9 @@ float apply_filter(float new_sample, float* states, const float* b, const float*
  */
 extern float min_activation_threshold;  // Minimum EMG level to activate assistance
 extern float direct_torque_gain;        // Gain to convert normalized EMG to torque
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ROBOT_EMG_CONTROLLER_H */ 
