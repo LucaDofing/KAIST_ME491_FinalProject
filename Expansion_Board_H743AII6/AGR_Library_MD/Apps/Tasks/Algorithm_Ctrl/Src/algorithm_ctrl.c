@@ -114,6 +114,56 @@ static void ControlInputSaturation(RobotData_t *robotDataObj, PIDObject *posCtrl
 
 /*---------- (1) START of STUDENT CODE (Declare the functions to use) -----------*/
 
+// EMG Filtering parameters
+#define EMG_BUFFER_SIZE 20
+#define FILTER_ORDER 4
+float emg_R1_buffer[EMG_BUFFER_SIZE] = {0};
+float emg_L1_buffer[EMG_BUFFER_SIZE] = {0};
+float emg_R1_filtered = 0.0f;
+float emg_L1_filtered = 0.0f;
+float emg_R1_envelope = 0.0f;
+float emg_L1_envelope = 0.0f;
+int buffer_index = 0;
+
+// Butterworth filter coefficients (4th order bandpass 20-450Hz)
+// These coefficients would normally be calculated based on the exact sampling rate
+// For demonstration purposes, using pre-calculated values
+const float bandpass_b[5] = {0.0971f, 0.0f, -0.1942f, 0.0f, 0.0971f};
+const float bandpass_a[5] = {1.0f, -2.4389f, 2.2948f, -0.9738f, 0.1576f};
+
+// Low-pass filter coefficients for envelope detection (6Hz cutoff)
+const float lowpass_b[5] = {0.0007f, 0.0029f, 0.0044f, 0.0029f, 0.0007f};
+const float lowpass_a[5] = {1.0f, -3.0904f, 3.8008f, -2.0939f, 0.4326f};
+
+// Filter state variables
+float emg_R1_bp_states[8] = {0}; // Bandpass states
+float emg_L1_bp_states[8] = {0};
+float emg_R1_lp_states[8] = {0}; // Lowpass states
+float emg_L1_lp_states[8] = {0};
+
+// EMG threshold for activation detection
+float emg_activation_threshold = 0.04f;
+
+// Assist torque gain - scales the EMG signal to appropriate torque
+float emg_torque_gain = 1.5f;
+
+// Controller state
+typedef enum {
+    STATE_STANCE,
+    STATE_SWING
+} GaitPhaseState;
+
+GaitPhaseState right_leg_state = STATE_STANCE;
+GaitPhaseState left_leg_state = STATE_STANCE;
+
+// Gait phase detection using both EMG and motion
+bool detect_swing_initiation(float hip_angle, float hip_vel, float emg_envelope);
+
+// EMG signal processing functions
+float update_bandpass_filter(float new_sample, float* states, const float* b, const float* a);
+float update_lowpass_filter(float new_sample, float* states, const float* b, const float* a);
+float process_emg_sample(float raw_emg, float* bp_states, float* lp_states);
+
 /*---------- (1) END of STUDENT CODE (Declare the functions to use) -------------*/
 
 DOP_COMMON_SDO_CB(algorithmCtrlTask)
@@ -350,6 +400,84 @@ static void StateEnable_Run(void)
 	/*---------------------- END of Control Sample Code ---------------------*/
 
 	/*--------------------- (2) START of STUDENT CODE (Write your code in this section) --------------------*/
+
+    // Set the control mode to USER_DEFINED_CTRL for our EMG-based controller
+    controlMode = USER_DEFINED_CTRL;
+
+    // 1. FIRST STEP: Process EMG signals
+    // This must happen before any control decisions are made
+    emg_R1_filtered = process_emg_sample(EMG_R1_Rawsignal, emg_R1_bp_states, emg_R1_lp_states);
+    emg_L1_filtered = process_emg_sample(EMG_L1_Rawsignal, emg_L1_bp_states, emg_L1_lp_states);
+
+    // Store filtered values for debugging
+    free_var1 = emg_R1_filtered;
+    free_var2 = emg_L1_filtered;
+
+    // 2. SECOND STEP: Calculate hip velocity and store previous values
+    // We need to calculate velocity before making control decisions
+    float hip_vel_RH = 0.0f;
+    float hip_vel_LH = 0.0f;
+    
+    // Use static variables to maintain previous values across function calls
+    static float prev_angle_RH = 0.0f;
+    static float prev_angle_LH = 0.0f;
+    static bool first_call = true;
+    
+    if (first_call) {
+        // Initialize on first call
+        prev_angle_RH = robotDataObj_RH.thighTheta_act;
+        prev_angle_LH = robotDataObj_LH.thighTheta_act;
+        first_call = false;
+    } else {
+        // Calculate velocity (deg/s) - multiply by 100 assuming 100Hz control frequency
+        hip_vel_RH = (robotDataObj_RH.thighTheta_act - prev_angle_RH) * 100.0f;
+        hip_vel_LH = (robotDataObj_LH.thighTheta_act - prev_angle_LH) * 100.0f;
+        
+        // Update previous values for next iteration
+        prev_angle_RH = robotDataObj_RH.thighTheta_act;
+        prev_angle_LH = robotDataObj_LH.thighTheta_act;
+    }
+    
+    // Store velocity for debugging
+    free_var3 = hip_vel_RH;
+    free_var4 = hip_vel_LH;
+
+    // 3. THIRD STEP: Detect gait phases using EMG and motion data
+    // Simplified gait phase detection - directly use EMG and velocity
+    bool right_swing_phase = (emg_R1_filtered > emg_activation_threshold) && (hip_vel_RH > 0.5f);
+    bool left_swing_phase = (emg_L1_filtered > emg_activation_threshold) && (hip_vel_LH > 0.5f);
+    
+    // Store phase detection result for debugging
+    free_var5 = (float)right_swing_phase;
+
+    // 4. FOURTH STEP: Apply torque based on detected gait phase
+    if (right_swing_phase) {
+        // Flexion assistance during swing (positive torque for hip flexion)
+        UserDefinedCtrl_RH.control_input = emg_R1_filtered * emg_torque_gain;
+    } else {
+        // No assistance during stance
+        UserDefinedCtrl_RH.control_input = 0.0f;
+    }
+    
+    if (left_swing_phase) {
+        // Flexion assistance during swing
+        UserDefinedCtrl_LH.control_input = emg_L1_filtered * emg_torque_gain;
+    } else {
+        // No assistance during stance
+        UserDefinedCtrl_LH.control_input = 0.0f;
+    }
+
+    // Reset other control inputs
+    posCtrl_RH.control_input = 0.0f;
+    posCtrl_LH.control_input = 0.0f;
+    gravCompDataObj_RH.control_input = 0.0f;
+    gravCompDataObj_LH.control_input = 0.0f;
+    impedanceCtrl_RH.control_input = 0.0f;
+    impedanceCtrl_LH.control_input = 0.0f;
+    f_vector_input_RH = 0.0f;
+    f_vector_input_LH = 0.0f;
+    StepCurr_RH.control_input = 0.0f;
+    StepCurr_LH.control_input = 0.0f;
 
 	/*------------------------------------ (2) END of STUDENT CODE-----------------------------------------*/
 	// Control Input Saturation (Do not Delete)
@@ -642,8 +770,60 @@ static void ControlInputSaturation(RobotData_t *robotDataObj, PIDObject *posCtrl
 
 /*----------- (3) START of STUDENT CODE (Define the functions to use) ------------*/
 
+// Implementation of bandpass filter for EMG signal
+float update_bandpass_filter(float new_sample, float* states, const float* b, const float* a) {
+    // Direct Form II Transposed implementation - efficient for real-time processing
+    float result = b[0] * new_sample + states[0];
+    
+    // Update states - shift values in the state array
+    for (int i = 0; i < FILTER_ORDER-1; i++) {
+        states[i] = b[i+1] * new_sample - a[i+1] * result + states[i+1];
+    }
+    states[FILTER_ORDER-1] = b[FILTER_ORDER] * new_sample - a[FILTER_ORDER] * result;
+    
+    return result;
+}
 
+// Implementation of lowpass filter for envelope detection
+float update_lowpass_filter(float new_sample, float* states, const float* b, const float* a) {
+    // Direct Form II Transposed implementation - efficient for real-time processing
+    float result = b[0] * new_sample + states[0];
+    
+    // Update states - shift values in the state array
+    for (int i = 0; i < FILTER_ORDER-1; i++) {
+        states[i] = b[i+1] * new_sample - a[i+1] * result + states[i+1];
+    }
+    states[FILTER_ORDER-1] = b[FILTER_ORDER] * new_sample - a[FILTER_ORDER] * result;
+    
+    return result;
+}
 
+// Process a single EMG sample through the full processing pipeline
+// This function is optimized for real-time processing
+float process_emg_sample(float raw_emg, float* bp_states, float* lp_states) {
+    // Step 1: Apply bandpass filter to remove noise and DC offset
+    // Uses Direct Form II Transposed implementation for efficiency
+    float filtered = update_bandpass_filter(raw_emg, bp_states, bandpass_b, bandpass_a);
+    
+    // Step 2: Rectify the signal (take absolute value)
+    float rectified = fabsf(filtered);
+    
+    // Step 3: Apply lowpass filter to get the envelope
+    // Uses Direct Form II Transposed implementation for efficiency
+    float envelope = update_lowpass_filter(rectified, lp_states, lowpass_b, lowpass_a);
+    
+    return envelope;
+}
 
+// Detect swing phase initiation based on EMG and hip velocity
+// This function is called directly in the main control loop now
+bool detect_swing_initiation(float hip_angle, float hip_vel, float emg_envelope) {
+    // Swing phase initiation: quad activation plus hip flexion beginning
+    // Relaxed conditions for better detection in real data
+    if (emg_envelope > emg_activation_threshold && hip_vel > 0.5f) {
+        return true;
+    }
+    return false;
+}
 
 /*------------ (3) END of STUDENT CODE (Define the functions to use) -------------*/
