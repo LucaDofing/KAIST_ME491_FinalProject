@@ -1,5 +1,4 @@
 #include "algorithm_ctrl.h"
-#include "robot_emg_controller.h"
 
 /* ------------------- Default Variables ------------------ */
 TaskObj_t algorithmCtrlTask;

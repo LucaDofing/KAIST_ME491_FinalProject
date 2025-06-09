@@ -3,11 +3,10 @@
  * Real-time EMG-based controller implementation for the Angel Suit H10 exoskeleton
  */
 
-// Include the core algorithm header first
-#include "algorithm_ctrl.h"
+// Include the core algorithm header
+#include "../Inc/algorithm_ctrl.h"
 
-// Then include our controller header
-#include "../Inc/robot_emg_controller.h"
+// No need to include robot_emg_controller.h separately as it's now part of algorithm_ctrl.h
 
 /* 
  * EMG Signal Processing Parameters
