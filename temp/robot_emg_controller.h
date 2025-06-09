@@ -83,4 +83,4 @@ float apply_filter(float new_sample, float* states, const float* b, const float*
 extern float min_activation_threshold;  // Minimum EMG level to activate assistance
 extern float direct_torque_gain;        // Gain to convert normalized EMG to torque
 
-#endif /* ROBOT_EMG_CONTROLLER_H */ 
+#endif /* ROBOT_EMG_CONTROLLER_H */

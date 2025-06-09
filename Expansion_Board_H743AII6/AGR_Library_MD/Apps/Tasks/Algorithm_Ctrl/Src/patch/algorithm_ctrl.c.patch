@@ -1,0 +1,239 @@
+#include "algorithm_ctrl.h"
+#include "robot_emg_controller.h"
+
+/* ------------------- Default Variables ------------------ */
+TaskObj_t algorithmCtrlTask;
+
+void algorithm_ctrl_task(void) {
+	// Implementation of the task
+}
+
+void algorithm_ctrl_init(void) {
+	// Implementation of the initialization
+}
+
+void algorithm_ctrl_update(void) {
+	// Implementation of the update
+}
+
+void algorithm_ctrl_deinit(void) {
+	// Implementation of the deinitialization
+}
+
+void algorithm_ctrl_control(void) {
+	// Implementation of the control
+}
+
+void algorithm_ctrl_control_mode(void) {
+	// Implementation of the control mode
+}
+
+void algorithm_ctrl_control_mode_user(void) {
+	// Implementation of the control mode user
+}
+
+void algorithm_ctrl_control_mode_suit(void) {
+	// Implementation of the control mode suit
+}
+
+void algorithm_ctrl_control_mode_assist(void) {
+	// Implementation of the control mode assist
+}
+
+void algorithm_ctrl_control_mode_user_defined(void) {
+	// Implementation of the control mode user defined
+}
+
+void algorithm_ctrl_control_mode_suit_h10(void) {
+	// Implementation of the control mode suit h10
+}
+
+void algorithm_ctrl_control_mode_assist_h10(void) {
+	// Implementation of the control mode assist h10
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10(void) {
+	// Implementation of the control mode user defined h10
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist(void) {
+	// Implementation of the control mode user defined h10 assist
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user(void) {
+	// Implementation of the control mode user defined h10 assist user
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined(void) {
+	// Implementation of the control mode user defined h10 assist user defined
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined
+}
+
+void algorithm_ctrl_control_mode_user_defined_h10_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined_assist_user_defined(void) {
+	// Implementation of the control mode user defined h10 assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined assist user defined
+}
+
+ 

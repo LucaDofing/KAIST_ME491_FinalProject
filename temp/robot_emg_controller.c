@@ -229,4 +229,4 @@ void emg_controller_update(void) {
     f_vector_input_LH = 0.0f;
     StepCurr_RH.control_input = 0.0f;
     StepCurr_LH.control_input = 0.0f;
-} 
+}
