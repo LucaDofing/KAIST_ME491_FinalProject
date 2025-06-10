@@ -385,6 +385,7 @@ typedef struct _StudentsData_t {
 	float gyrZ;
 
 	float u_input;
+	float 
 } StudentsData_t;
 
 /* For P-vector and F-vector */

@@ -1,80 +1,115 @@
-#ifndef ALGORITHM_CTRL_H
-#define ALGORITHM_CTRL_H
+#ifndef ALGORITHM_CTRL_INC_ALGORITHM_CTRL_H_
+#define ALGORITHM_CTRL_INC_ALGORITHM_CTRL_H_
 
-#include <stdint.h>
+#include "module.h"
+
 #include <stdbool.h>
 #include <math.h>
 
-/* Constants */
-#define ALGORITHM_CTRL_PERIOD   0.01f  // 10ms control period
-#define DEG2RAD                 0.01745329252f
-#define RAD2DEG                 57.29577951f
+#include "ioif_tim_common.h"
+#include "error_dictionary.h"
 
-/* State Definitions */
-#define STATE_OFF               0
-#define STATE_STANDBY           1
-#define STATE_ENABLE            2
-#define STATE_ERROR             3
+#include "msg_hdlr.h"
+#include "exppack_ctrl.h"
+#include "data_object_common.h"
+#include "ioif_adc_common.h"
+#include "task_mngr.h"
 
-/* Control Mode Definitions */
-#define NO_CONTROL              0
-#define POSITION_CTRL           1
-#define GRAVITY_COMPENSATION    2
-#define IMPEDANCE_CTRL          3
-#define STEP_CURRENT            4
-#define F_VECTOR_CTRL           5
-#define USER_DEFINED_CTRL       6
+/**
+ *-----------------------------------------------------------
+ *              MACROS AND PREPROCESSOR DIRECTIVES
+ *-----------------------------------------------------------
+ * @brief Directives and macros for readability and efficiency.
+ */
 
-/* Motor Definitions */
-#define RH_MOTOR                0
-#define LH_MOTOR                1
+#define DT 0.001
+#define GEAR_RATIO 18.75
+#define MOTOR_TORQUE_CONSTANT 0.085
 
-/* Task Object */
-typedef struct {
-    uint8_t state;
-    uint8_t prevState;
-    uint32_t loopCnt;
-    uint32_t loopPrevCnt;
-    float timeElap;
-    float timePrevElap;
-} TaskObj_t;
 
-/* Robot Data Structure */
-typedef struct {
-    float thighTheta_act;       // Actual thigh angle (degrees)
-    float thighOmega_act;       // Actual thigh angular velocity (degrees/s)
-    float thighAlpha_act;       // Actual thigh angular acceleration (degrees/s^2)
-    float thighTorque_act;      // Actual thigh torque (Nm)
-    float thighCurrent_act;     // Actual thigh motor current (A)
-    float control_input;        // Control input to the motor
+/**
+ *------------------------------------------------------------
+ *                     TYPE DECLARATIONS
+ *------------------------------------------------------------
+ * @brief Custom data types and structures for the module.
+ */
+
+typedef enum _ControlMode_t {
+    DEFAULT_CONTRL_MODE,       // 0: 기본 보조 모드
+    POSITION_CTRL = 1,         // 1: 위치 제어 모드
+    GRAVITY_COMPENSATION,      // 2: 중력 보상 모드
+    IMPEDANCE_CTRL,            // 3: 임피던스 제어 모드
+    TORQUE_CTRL,               // 4: 토크 제어 모드
+    STEP_CURRENT_CTRL,         // 5: 스텝 전류 모드 ← 추가
+    USER_DEFINED_CTRL,         // 6: 사용자 정의 모드 ← 추가
+    CONTROL_MODE_NUM           // 7: 전체 모드 개수
+} ControlMode;
+
+typedef enum _MOTOR_t {
+	RH_MOTOR = 0,
+	LH_MOTOR = 1,
+} MOTOR;
+
+typedef struct _RobotData_t {
+	float u_totalInput;		// control input
+
+	float thighTheta_act;	// Thigh degree (received [MD->MiniCM->EXTboard])
+	float position_act;		// Actual position (received [MD->MiniCM->EXTboard])
+	float position_ref;		// Reference position
+
+	float accX;			// (received [MD->MiniCM->EXTboard])
+	float accY;			// (received [MD->MiniCM->EXTboard])
+	float gyrZ;
+
+	float e;
+	float e_prev;
+	float e_dot;
 } RobotData_t;
 
-/* Student Data Structure */
-typedef struct {
-    float thigh_theta;          // Thigh angle (degrees)
-    float thigh_omega;          // Thigh angular velocity (degrees/s)
-    float thigh_alpha;          // Thigh angular acceleration (degrees/s^2)
-    float thigh_torque;         // Thigh torque (Nm)
-    float thigh_current;        // Thigh motor current (A)
-} StudentsData_t;
+typedef struct _ImpedanceCtrl {
+	/* Parameters */
+	float epsilon, Kp, Kd, lambda;
 
-/* Extension Pack Data Structure */
-typedef struct {
-    struct {
-        float emg_R1_MA;        // Right EMG channel 1 moving average
-        float emg_L1_MA;        // Left EMG channel 1 moving average
-    } emg_data;
-    
-    struct {
-        uint16_t fsr1_R1;       // Right FSR 1
-        uint16_t fsr2_R2;       // Right FSR 2
-        uint16_t fsr1_L1;       // Left FSR 1
-        uint16_t fsr2_L2;       // Left FSR 2
-    } fsr_data;
-} Extpack_Data_t;
+	float gap_epsilon;
+	float gap_Kp;
+	float gap_Kd;
+	float gap_lambda;
 
-/* PID Controller Structure */
-typedef struct {
+	float e;  // error
+	float ef; // output of error function
+
+	float ef_f;
+	float ef_diff;
+
+	float duration;
+
+	float control_input;
+
+	uint16_t i; // 1ms counter
+	uint8_t ON; // flag
+} ImpedanceCtrl;
+
+typedef struct _GravComp {
+	float grav_comp_torque;
+	float grav_gain;
+	float f_grav_comp_torque;
+	float grav_alpha;
+
+	float control_input;  // control input
+} GravComp;
+
+typedef struct _StepCurr {
+
+	float control_input;  // control input
+} StepCurr;
+
+typedef struct _UserDefinedCtrl {
+
+	float control_input;  // control input
+} UserDefinedCtrl;
+
+/* PID Controller Structure needed for EMG controller */
+typedef struct _PIDObject {
     float Kp;                   // Proportional gain
     float Ki;                   // Integral gain
     float Kd;                   // Derivative gain
@@ -89,88 +124,36 @@ typedef struct {
     float control_input;        // Control input
 } PIDObject;
 
-/* Gravity Compensation Structure */
-typedef struct {
-    float grav_comp_torque;     // Gravity compensation torque
-    float grav_gain;            // Gravity gain
-    float f_grav_comp_torque;   // Filtered gravity compensation torque
-    float grav_alpha;           // Gravity filter coefficient
-    float control_input;        // Control input
-} GravComp;
 
-/* Impedance Controller Structure */
-typedef struct {
-    float epsilon;              // Epsilon value for error function
-    float Kp;                   // Proportional gain
-    float Kd;                   // Derivative gain
-    float lambda;               // Filter coefficient
-    
-    float gap_epsilon;          // Epsilon gap
-    float gap_Kp;               // Proportional gain gap
-    float gap_Kd;               // Derivative gain gap
-    float gap_lambda;           // Filter coefficient gap
-    
-    float e;                    // Error
-    float ef;                   // Error function
-    float ef_f;                 // Filtered error function
-    float ef_diff;              // Error function derivative
-    
-    float duration;             // Duration
-    
-    float control_input;        // Control input
-    
-    uint32_t i;                 // Counter
-    uint8_t ON;                 // ON flag
-} ImpedanceCtrl;
+/**
+ *------------------------------------------------------------
+ *                      GLOBAL VARIABLES
+ *------------------------------------------------------------
+ * @brief Extern declarations for global variables.
+ */
 
-/* Step Current Structure */
-typedef struct {
-    float control_input;        // Control input
-} StepCurr;
-
-/* User Defined Controller Structure */
-typedef struct {
-    float control_input;        // Control input
-} UserDefinedCtrl;
-
-/* P-Vector Decoder Structure */
-typedef struct {
-    uint32_t motionCnt;         // Motion counter
-    uint32_t motionIdx;         // Motion index
-} P_Vector_Decoder;
-
-/* F-Vector Decoder Structure */
-typedef struct {
-    uint32_t motionCnt;         // Motion counter
-    uint32_t motionIdx;         // Motion index
-} F_Vector_Decoder;
-
-/* Motion Map File Info Structure */
-typedef struct {
-    uint8_t dummy;              // Dummy variable
-} MotionMapFileInfo;
-
-/* Global Variables */
 extern TaskObj_t algorithmCtrlTask;
-extern uint8_t CM_connect_signal;
-extern uint8_t CM_disconnect_signal;
+extern RobotData_t robotDataObj_RH;
+extern RobotData_t robotDataObj_LH;
 extern uint8_t motionMap_selection;
 extern uint8_t startPvector_decoding;
-extern uint8_t controlMode;
-extern float EMG_Rawsignal;
+extern ControlMode controlMode;
+// extern float EMG_Rawsignal;
 extern float EMG_R1_Rawsignal;
 extern float EMG_L1_Rawsignal;
-extern uint16_t fsr1_R1;
-extern uint16_t fsr2_R2;
-extern uint16_t fsr1_L1;
-extern uint16_t fsr2_L2;
 extern float free_var1;
 extern float free_var2;
 extern float free_var3;
 extern float free_var4;
 extern float free_var5;
-extern RobotData_t robotDataObj_RH;
-extern RobotData_t robotDataObj_LH;
+extern uint8_t CM_connect_signal;
+extern uint8_t CM_disconnect_signal;
+extern uint8_t ackSignal;
+extern float f_vector_input_RH;
+extern float f_vector_input_LH;
+extern float assist_level;
+
+/* Additional variables needed for EMG controller */
 extern GravComp gravCompDataObj_RH;
 extern GravComp gravCompDataObj_LH;
 extern ImpedanceCtrl impedanceCtrl_RH;
@@ -179,107 +162,24 @@ extern StepCurr StepCurr_RH;
 extern StepCurr StepCurr_LH;
 extern UserDefinedCtrl UserDefinedCtrl_RH;
 extern UserDefinedCtrl UserDefinedCtrl_LH;
-extern bool isFirstPos_RH;
-extern bool isFirstPos_LH;
-extern bool isFirstImp_RH;
-extern bool isFirstImp_LH;
-extern bool pVectorTrig_RH;
-extern bool pVectorTrig_LH;
-extern bool fVectorTrig_RH;
-extern bool fVectorTrig_LH;
-extern uint8_t MotionMap_ID_RH;
-extern uint8_t MotionMap_ID_LH;
-extern float RightHipFlexionTorque;
-extern float RightHipExtensionTorque;
-extern float LeftHipFlexionTorque;
-extern float LeftHipExtensionTorque;
-extern uint8_t ackSignal;
-extern float f_vector_input_RH;
-extern float f_vector_input_LH;
-extern float assist_level;
+extern PIDObject posCtrl_RH;
+extern PIDObject posCtrl_LH;
 extern StudentsData_t studentsDataObj_RH;
 extern StudentsData_t studentsDataObj_LH;
 extern Extpack_Data_t extpackDataObj;
-extern PIDObject posCtrl_RH;
-extern PIDObject posCtrl_LH;
 
-/* Function Prototypes */
+
+/**
+ *------------------------------------------------------------
+ *                     FUNCTION PROTOTYPES
+ *------------------------------------------------------------
+ * @brief Function prototypes declaration for this module.
+ */
+
 void InitAlgorithmCtrl(void);
 void RunAlgorithmCtrl(void* params);
 
-/* 
- * EMG Controller Function Prototypes 
- */
+/* Include the EMG controller header */
+#include "robot_emg_controller.h"
 
-/**
- * @brief Main EMG controller update function
- * 
- * This function should be called from the algorithm_ctrl.c file in the USER_DEFINED_CTRL section.
- * It processes EMG signals, normalizes them, and applies appropriate torque to assist the user.
- */
-void emg_controller_update(void);
-
-/**
- * @brief Process a single EMG sample through the full processing pipeline
- * 
- * @param raw_emg Raw EMG signal value
- * @param bp_states Bandpass filter state array
- * @param lp_states Lowpass filter state array
- * @return Processed EMG envelope value
- */
-float process_emg_sample(float raw_emg, float* bp_states, float* lp_states);
-
-/**
- * @brief Normalize EMG envelope based on calibration
- * 
- * @param envelope EMG envelope value
- * @param max_value Maximum EMG value from calibration
- * @return Normalized EMG value in range [0,1]
- */
-float normalize_emg(float envelope, float max_value);
-
-/**
- * @brief Convert normalized EMG to torque using direct mapping
- * 
- * @param normalized_emg Normalized EMG value in range [0,1]
- * @return Torque value to apply to the joint
- */
-float compute_torque(float normalized_emg);
-
-/**
- * @brief Update calibration buffers and calculate max values when complete
- * 
- * @param emg_R1_filtered Filtered right EMG value
- * @param emg_L1_filtered Filtered left EMG value
- */
-void update_calibration(float emg_R1_filtered, float emg_L1_filtered);
-
-/**
- * @brief Calculate percentile of an array
- * 
- * @param data Array of data values
- * @param n Size of the array
- * @param p Percentile to calculate (0.0 to 1.0)
- * @return Value at the specified percentile
- */
-float percentile(float* data, int n, float p);
-
-/**
- * @brief Apply filter to a signal sample
- * 
- * @param new_sample New signal sample
- * @param states Filter state array
- * @param b Filter numerator coefficients
- * @param a Filter denominator coefficients
- * @return Filtered sample
- */
-float apply_filter(float new_sample, float* states, const float* b, const float* a);
-
-/*
- * Configuration Parameters
- * These can be modified to tune the controller behavior
- */
-extern float min_activation_threshold;  // Minimum EMG level to activate assistance
-extern float direct_torque_gain;        // Gain to convert normalized EMG to torque
-
-#endif /* ALGORITHM_CTRL_H */
+#endif /* ALGORITHM_CTRL_INC_ALGORITHM_CTRL_H_ */

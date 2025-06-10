@@ -5,8 +5,7 @@
 
 // Include the core algorithm header
 #include "../Inc/algorithm_ctrl.h"
-
-// No need to include robot_emg_controller.h separately as it's now part of algorithm_ctrl.h
+#include "../Inc/robot_emg_controller.h"
 
 /* 
  * EMG Signal Processing Parameters
