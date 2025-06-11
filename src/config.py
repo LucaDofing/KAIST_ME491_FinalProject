@@ -18,7 +18,7 @@ LOWPASS_ENVELOPE_FILTER_PARAMS = {
 }
 
 # --- Data File and Column Configuration ---
-DEFAULT_DATA_FILEPATH = "data/raw/converted_data7.csv"
+DEFAULT_DATA_FILEPATH = "data/raw/converted_data8.csv"
 EMG_COLUMNS = {
     "RightLeg": "emg_R1",
     "LeftLeg": "emg_L1"
