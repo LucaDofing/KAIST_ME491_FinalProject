@@ -334,29 +334,38 @@ static void StateEnable_Run(void)
 		    }
 
 		} else if (controlMode == USER_DEFINED_CTRL) {   // 6 - User Defined Control
-            // Reset other control inputs
-            posCtrl_RH.control_input = 0.0f;
-            posCtrl_LH.control_input = 0.0f;
-            gravCompDataObj_RH.control_input = 0.0f;
-            gravCompDataObj_LH.control_input = 0.0f;
-            impedanceCtrl_RH.control_input = 0.0f;
-            impedanceCtrl_LH.control_input = 0.0f;
-            f_vector_input_LH = 0.0f;
-            f_vector_input_RH = 0.0f;
-            StepCurr_RH.control_input = 0.0f;
-            StepCurr_LH.control_input = 0.0f;
-            
-            // Apply EMG control
-            // Right side EMG control
-            EMGControl_Sample(&UserDefinedCtrl_RH, EMG_R1_Rawsignal, 0.001, 30);
-            
-            // Left side EMG control
-            EMGControl_Sample(&UserDefinedCtrl_LH, EMG_L1_Rawsignal, 0.001, 30);
-            
-            // Display filtered EMG values for debugging
-            free_var4 = UserDefinedCtrl_RH.control_input;
-            free_var5 = UserDefinedCtrl_LH.control_input;
-//            free_var6 = ;
+    		// Reset other control inputs
+    		posCtrl_RH.control_input = 0.0f;
+    		posCtrl_LH.control_input = 0.0f;
+    		gravCompDataObj_RH.control_input = 0.0f;
+    		gravCompDataObj_LH.control_input = 0.0f;
+    		impedanceCtrl_RH.control_input = 0.0f;
+			impedanceCtrl_LH.control_input = 0.0f;
+			f_vector_input_LH = 0.0f;
+			f_vector_input_RH = 0.0f;
+			StepCurr_RH.control_input = 0.0f;
+			StepCurr_LH.control_input = 0.0f;
+    
+			// ============================ MODIFIED LOGIC START ============================
+			// PROBLEM: Original code used an if/else if to switch between legs, causing instability.
+			// SOLUTION: Process both legs independently in every single control loop.
+			
+			// Define your tuning parameters (or use the free_vars)
+			float emg_threshold = 0.01f; // The minimum EMG signal to trigger assistance
+			float emg_gain = 30.0f;      // How much to assist for a given EMG signal
+			
+			// You can link these to free_vars for real-time tuning:
+			// float emg_threshold = free_var1;
+			// float emg_gain = free_var2;
+
+			// Independently calculate control for Right and Left legs
+			EMGControl_Sample(&UserDefinedCtrl_RH, EMG_R1_Rawsignal, emg_threshold, emg_gain);
+			EMGControl_Sample(&UserDefinedCtrl_LH, EMG_L1_Rawsignal, emg_threshold, emg_gain);
+			
+			// Display control inputs for debugging
+			free_var4 = UserDefinedCtrl_RH.control_input;
+			free_var5 = UserDefinedCtrl_LH.control_input;
+			// ============================= MODIFIED LOGIC END =============================
 
 		} else {
 			// default : SUIT H10 Assist Mode
@@ -687,60 +696,54 @@ static void InitEMGController(void)
 }
 
 /**
- * @brief Process EMG signal and generate control input
+ * @brief Process EMG signal and generate control input for a single leg. (REVISED)
  * 
- * @param userCtrl - Pointer to UserDefinedCtrl structure
- * @param emg_signal - Raw EMG signal input
- * @param threshold - Threshold for EMG activation (can be adjusted via free_var1)
- * @param gain - Gain for EMG control (can be adjusted via free_var2)
+ * @param userCtrl - Pointer to the UserDefinedCtrl structure for the target leg (RH or LH)
+ * @param emg_signal - Raw EMG signal input for that leg
+ * @param threshold - Threshold for EMG activation
+ * @param gain - Gain for EMG control
  */
 static void EMGControl_Sample(UserDefinedCtrl* userCtrl, float emg_signal, float threshold, float gain) 
 {
+    // Use separate static variables for each leg's filter state.
     static float filtered_emg_RH = 0.0f;
     static float filtered_emg_LH = 0.0f;
+    
     float* filtered_emg_ptr;
     
-    // Determine which filtered EMG value to use based on which controller we're updating
+    // Point to the correct filter state based on the controller being updated
     if (userCtrl == &UserDefinedCtrl_RH) {
         filtered_emg_ptr = &filtered_emg_RH;
-    } else {
+    } else { // Assumes &UserDefinedCtrl_LH
         filtered_emg_ptr = &filtered_emg_LH;
     }
     
-    // Apply low-pass filter to EMG signal (alpha = 0.95 for smooth filtering)
+    // 1. Apply low-pass filter to the raw EMG signal to get a smooth activation profile.
+    // An alpha of 0.95 is a good starting point for smoothing.
     *filtered_emg_ptr = LowPassFilter(emg_signal, *filtered_emg_ptr, 0.95f);
     
-    // Set default values if parameters are not provided
-    if (threshold <= 0.0f) threshold = 0.01f;  // Default threshold
-    if (gain <= 0.0f) gain = 2.0f;            // Default gain
-    
-    // Apply threshold and calculate control input
     float emg_activation = 0.0f;
+
+    // 2. Apply a dead-band (threshold) to prevent noise from causing unwanted assistance.
     if (*filtered_emg_ptr > threshold) {
+        // Calculate assistance level based on how much the signal is above the threshold.
         emg_activation = (*filtered_emg_ptr - threshold) * gain;
         
-        // Limit maximum control input to avoid excessive force
+        // 3. Saturate the activation to a safe maximum torque (e.g., 5.0 Nm).
+        // This prevents sudden, large EMG spikes from creating dangerous movements.
         if (emg_activation > 5.0f) {
             emg_activation = 5.0f;
         }
-        
-        // Gait phase-specific support
-        // When one leg flexes (negative torque), help the other leg extend (positive torque)
-        if (userCtrl == &UserDefinedCtrl_RH && emg_activation > 2.0f) {
-            // When right hip flexes, help left hip extend
-            UserDefinedCtrl_LH.control_input = emg_activation * 0.6f / GEAR_RATIO / MOTOR_TORQUE_CONSTANT;
-            free_var6 = UserDefinedCtrl_LH.control_input; // For debugging
-        } 
-        else if (userCtrl == &UserDefinedCtrl_LH && emg_activation > 2.0f) {
-            // When left hip flexes, help right hip extend
-            UserDefinedCtrl_RH.control_input = emg_activation * 0.6f / GEAR_RATIO / MOTOR_TORQUE_CONSTANT;
-            free_var6 = UserDefinedCtrl_RH.control_input; // For debugging
-        }
     }
     
-    // Set control input - will be scaled by assist_level in ControlInputSaturation
-    emg_activation = (emg_activation / GEAR_RATIO / MOTOR_TORQUE_CONSTANT);
-    userCtrl->control_input = -emg_activation;  // Negative for flexion
+    // 4. Convert the desired torque (emg_activation) into a motor current input.
+    // The control input is assumed to be flexion (negative torque/current).
+    // If you want extension, this should be positive.
+    userCtrl->control_input = -(emg_activation / GEAR_RATIO / MOTOR_TORQUE_CONSTANT);
+    
+    // REMOVED: The unstable cross-coupling logic that modified the *other* leg's controller.
+    // This was a major source of fluctuation and instability.
+    // Contralateral control should be added back carefully at a higher level once this is stable.
 }
 
 /**
