@@ -334,38 +334,56 @@ static void StateEnable_Run(void)
 		    }
 
 		} else if (controlMode == USER_DEFINED_CTRL) {   // 6 - User Defined Control
-    		// Reset other control inputs
-    		posCtrl_RH.control_input = 0.0f;
-    		posCtrl_LH.control_input = 0.0f;
-    		gravCompDataObj_RH.control_input = 0.0f;
-    		gravCompDataObj_LH.control_input = 0.0f;
-    		impedanceCtrl_RH.control_input = 0.0f;
+			// Reset other control inputs
+			posCtrl_RH.control_input = 0.0f;
+			posCtrl_LH.control_input = 0.0f;
+			gravCompDataObj_RH.control_input = 0.0f;
+			gravCompDataObj_LH.control_input = 0.0f;
+			impedanceCtrl_RH.control_input = 0.0f;
 			impedanceCtrl_LH.control_input = 0.0f;
 			f_vector_input_LH = 0.0f;
 			f_vector_input_RH = 0.0f;
 			StepCurr_RH.control_input = 0.0f;
 			StepCurr_LH.control_input = 0.0f;
-    
-			// ============================ MODIFIED LOGIC START ============================
-			// PROBLEM: Original code used an if/else if to switch between legs, causing instability.
-			// SOLUTION: Process both legs independently in every single control loop.
-			
-			// Define your tuning parameters (or use the free_vars)
-			float emg_threshold = 0.01f; // The minimum EMG signal to trigger assistance
-			float emg_gain = 30.0f;      // How much to assist for a given EMG signal
-			
-			// You can link these to free_vars for real-time tuning:
-			// float emg_threshold = free_var1;
-			// float emg_gain = free_var2;
 
-			// Independently calculate control for Right and Left legs
+			// --- Tuning Parameters ---
+			float emg_threshold = 0.01f;
+			float emg_gain = 50.0f;
+			
+			// ============================ REVISED MINIMAL CHANGE LOGIC ============================
+
+			// --- 1. Calculate Primary FLEXION assist for each leg independently ---
+			// These functions calculate the flexion (lifting) command for each leg.
 			EMGControl_Sample(&UserDefinedCtrl_RH, EMG_R1_Rawsignal, emg_threshold, emg_gain);
 			EMGControl_Sample(&UserDefinedCtrl_LH, EMG_L1_Rawsignal, emg_threshold, emg_gain);
+
+			// Store the primary flexion commands before we modify them
+			// Note: These values will be negative or zero.
+			float primary_flexion_RH = UserDefinedCtrl_RH.control_input;
+			float primary_flexion_LH = UserDefinedCtrl_LH.control_input;
+
+			// --- 2. Add Contralateral EXTENSION Assist ---
+			// If the right leg is lifting (flexing), help the left leg push back (extend).
+			// A contralateral gain tunes how much the other leg pushes off.
+			const float contralateral_gain = 1.0f; // Tune this: 0.7 = 70% of the force is used to extend the other leg.
 			
-			// Display control inputs for debugging
+			// We check for a negative command because flexion is negative.
+			if (primary_flexion_RH < -0.025f) { // Check if right leg is actively flexing
+				// Add a POSITIVE (extension) command to the left leg.
+				// We use -primary_flexion_RH to make the value positive before applying the gain.
+				UserDefinedCtrl_LH.control_input += (-primary_flexion_RH * contralateral_gain);
+			}
+			
+			if (primary_flexion_LH < -0.025f) { // Check if left leg is actively flexing
+				// Add a POSITIVE (extension) command to the right leg.
+				UserDefinedCtrl_RH.control_input += (-primary_flexion_LH * contralateral_gain);
+			}
+			
+			// Display final control inputs for debugging
 			free_var4 = UserDefinedCtrl_RH.control_input;
 			free_var5 = UserDefinedCtrl_LH.control_input;
-			// ============================= MODIFIED LOGIC END =============================
+
+			// ============================= REVISED MINIMAL CHANGE LOGIC END =============================
 
 		} else {
 			// default : SUIT H10 Assist Mode
