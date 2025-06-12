@@ -1,55 +1,56 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import glob
+import os
 
-# --- Load CSV ---
-csv_path = "data/raw/FSR/converted_data3.csv"  # <- Replace with your actual file path
-df = pd.read_csv(csv_path)
+# --- File list ---
+fsr_folder = "data/raw/FSR"
+file_pattern = os.path.join(fsr_folder, "converted_data_fsr_*.csv")
+# file_list = sorted(glob.glob(file_pattern))
+file_list = ["data/raw/FSR/fsr assisted 6.12/converted_fsr_612_2.csv"]
 
 # Set your sampling rate (Hz)
 fs = 1000  # Change this to your actual sampling rate
 
-# Create a time array
-time = np.arange(len(df)) / fs
+for idx, file in enumerate(file_list[:5]):
+    df = pd.read_csv(file)
+    time = np.arange(len(df)) / fs
 
-FSR_FRONT_THRESHOLD = 2700  # adjust as needed
-FSR_HEEL_THRESHOLD = 2700   # adjust as needed
+    # Filter for first 30 seconds
+    mask = time <= 30
+    time_30 = time[mask]
 
-# Get FSR data for left leg
-fsr_front = df['fsr_L1']
-fsr_heel = df['fsr_L2']
+    # FSR right leg
+    fsr_r1 = df['fsr_R1'][mask]
+    fsr_r2 = df['fsr_R2'][mask]
+    # Thigh angles
+    thigh_rh = df['thighDeg_RH'][mask]
+    thigh_lh = df['thighDeg_LH'][mask]
 
-# Gait phase detection
-gait_phase = np.zeros(len(df), dtype=int)
-for i in range(len(df)):
-    if fsr_front[i] < FSR_FRONT_THRESHOLD and fsr_heel[i] > FSR_HEEL_THRESHOLD:
-        gait_phase[i] = 1  # INITIAL_CONTACT
-    elif fsr_front[i] > FSR_FRONT_THRESHOLD and fsr_heel[i] > FSR_HEEL_THRESHOLD:
-        gait_phase[i] = 2  # MID_STANCE
-    elif fsr_front[i] > FSR_FRONT_THRESHOLD and fsr_heel[i] < FSR_HEEL_THRESHOLD:
-        gait_phase[i] = 3  # TERMINAL_STANCE
-    else:
-        gait_phase[i] = 4  # SWING
+    plt.figure(figsize=(12, 6))
 
-# --- Plot Settings ---
-plt.subplot(3, 1, 1)
-plt.plot(time, fsr_front, label='FSR Left Front (L1)')
-plt.plot(time, fsr_heel, label='FSR Left Heel (L2)')
-plt.title('FSR Left Sensors')
-plt.xlabel('Time (s)')
-plt.ylabel('FSR Value')
-plt.legend()
-plt.grid(True)
-plt.xticks(np.arange(0, time[-1]+1, 1))  # 1-second resolution
+    # FSR subplot
+    plt.subplot(2, 1, 1)
+    plt.plot(time_30, fsr_r1, label='FSR Right 1')
+    plt.plot(time_30, fsr_r2, label='FSR Right 2')
+    plt.title(f"FSR Right Leg - {os.path.basename(file)}")
+    plt.xlabel('Time (s)')
+    plt.ylabel('FSR Value')
+    plt.legend()
+    plt.grid(True)
+    plt.xlim([0, min(30, time_30[-1])])
 
-plt.subplot(3, 1, 2)
-plt.plot(time, gait_phase, drawstyle='steps-post')
-plt.yticks([1,2,3,4], ['IC', 'Mid Stance', 'Terminal Stance', 'Swing'])
-plt.title('Detected Gait Phase (Left Leg)')
-plt.xlabel('Time (s)')
-plt.ylabel('Gait Phase')
-plt.grid(True)
-plt.xticks(np.arange(0, time[-1]+1, 1))  # 1-second resolution
+    # Thigh angle subplot
+    plt.subplot(2, 1, 2)
+    plt.plot(time_30, thigh_rh, label='Thigh RH')
+    plt.plot(time_30, thigh_lh, label='Thigh LH')
+    plt.title("Thigh Angles")
+    plt.xlabel('Time (s)')
+    plt.ylabel('Thigh Angle (deg)')
+    plt.legend()
+    plt.grid(True)
+    plt.xlim([0, min(30, time_30[-1])])
 
-plt.tight_layout()
-plt.show()
+    plt.tight_layout()
+    plt.show()
